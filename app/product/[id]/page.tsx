@@ -5,7 +5,10 @@ import { ProductTabs } from "../../components/ProductTabs";
 import { SeasonTag } from "../../components/SeasonTag";
 import { ArrowLeftIcon, TokenIcon } from "../../components/icons";
 import { PRODUCTS, getProduct } from "../../data/products";
-import { buildSeries } from "../../lib/chart-data";
+import { buildSeries, seriesFromHistory } from "../../lib/chart-data";
+import { computeStats, formatApy, formatTvl, getHistory } from "../../lib/api";
+
+export const revalidate = 300;
 
 export function generateStaticParams() {
   return PRODUCTS.map((product) => ({ id: product.id }));
@@ -16,7 +19,14 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const product = getProduct(id);
   if (!product) notFound();
 
-  const series = buildSeries(product.id);
+  const history = await getHistory(product.address);
+  const live = history.length ? computeStats(history) : null;
+
+  const recapApy = live ? formatApy(live.currentApy) : product.apy;
+  const stats = live
+    ? { apy24h: formatApy(live.apy24h), apy7d: formatApy(live.apy7d), tvl: formatTvl(live.tvl) }
+    : product.stats;
+  const series = history.length ? seriesFromHistory(history) : buildSeries(product.id);
 
   return (
     <main className="app-shell">
@@ -38,12 +48,12 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             <p className="recap-tagline">{product.tagline}</p>
           </div>
           <div className="recap-apy">
-            <span className="recap-apy-value">{product.apy}</span>
+            <span className="recap-apy-value">{recapApy}</span>
             <span className="recap-apy-label">APY</span>
           </div>
         </section>
 
-        <ProductTabs product={product} series={series} />
+        <ProductTabs product={product} stats={stats} series={series} live={!!live} />
       </div>
     </main>
   );

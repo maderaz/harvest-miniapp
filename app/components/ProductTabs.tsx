@@ -12,8 +12,19 @@ const TABS = [
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
+type Stats = { apy24h: string; apy7d: string; tvl: string };
 
-export function ProductTabs({ product, series }: { product: Product; series: ChartSeries }) {
+export function ProductTabs({
+  product,
+  stats,
+  series,
+  live,
+}: {
+  product: Product;
+  stats: Stats;
+  series: ChartSeries;
+  live: boolean;
+}) {
   const [active, setActive] = useState<TabId>("holdings");
 
   return (
@@ -36,7 +47,7 @@ export function ProductTabs({ product, series }: { product: Product; series: Cha
       {active === "holdings" ? (
         <DepositPanel product={product} />
       ) : (
-        <PerformancePanel product={product} series={series} />
+        <PerformancePanel stats={stats} series={series} live={live} />
       )}
     </div>
   );

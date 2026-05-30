@@ -50,3 +50,22 @@ export function buildSeries(id: string, points = 32): ChartSeries {
 
   return { sharePrice: normalize(rawSharePrice), apy: normalize(rawApy) };
 }
+
+function downsample<T>(arr: T[], target: number): T[] {
+  if (arr.length <= target) return arr;
+  const step = arr.length / target;
+  const out: T[] = [];
+  for (let i = 0; i < target; i++) out.push(arr[Math.floor(i * step)]);
+  out.push(arr[arr.length - 1]);
+  return out;
+}
+
+// Normalised chart series from real history (oldest -> newest), downsampled
+// so a long series still draws as a smooth line.
+export function seriesFromHistory(history: { sharePrice: number; apy: number }[], target = 120): ChartSeries {
+  const recs = downsample(history, target);
+  return {
+    sharePrice: normalize(recs.map((r) => r.sharePrice)),
+    apy: normalize(recs.map((r) => r.apy)),
+  };
+}

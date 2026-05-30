@@ -5,20 +5,22 @@ export type Product = {
   id: string;
   asset: AssetSymbol;
   name: string;
-  apy: string; // pre-formatted headline APY, e.g. "5.65%"
+  address: string; // Autopilot (plasma vault) address on Base
+  apy: string; // fallback headline APY if the live feed is unavailable
   tagline: string;
   network: string;
-  stats: { apy24h: string; apy7d: string; tvl: string };
+  stats: { apy24h: string; apy7d: string; tvl: string }; // fallbacks
   depositTokens: TokenSymbol[];
 };
 
-// First-iteration content. Only the WETH headline APY (5.65%) was specified;
-// every other figure is a placeholder - wire these to live vault data later.
+// Live APY / TVL / chart come from the Harvest API (see lib/api.ts). The
+// values below are fallbacks shown only if the feed is unreachable.
 export const PRODUCTS: Product[] = [
   {
     id: "weth-autopilot",
     asset: "WETH",
     name: "WETH Autopilot",
+    address: "0x7872893e528Fe2c0829e405960db5B742112aa97",
     apy: "5.65%",
     tagline: "Auto-compounding WETH yield on Base.",
     network: "Base",
@@ -29,6 +31,7 @@ export const PRODUCTS: Product[] = [
     id: "usdc-autopilot",
     asset: "USDC",
     name: "USDC Autopilot",
+    address: "0x0d877Dc7C8Fa3aD980DfDb18B48eC9F8768359C4",
     apy: "7.42%",
     tagline: "Auto-compounding USDC yield on Base.",
     network: "Base",
@@ -39,6 +42,7 @@ export const PRODUCTS: Product[] = [
     id: "cbbtc-autopilot",
     asset: "cbBTC",
     name: "cbBTC Autopilot",
+    address: "0x31A421271414641cb5063B71594b642D2666dB6B",
     apy: "3.18%",
     tagline: "Auto-compounding cbBTC yield on Base.",
     network: "Base",
