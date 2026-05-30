@@ -1,5 +1,6 @@
+import Link from "next/link";
 import type { Product } from "../data/products";
-import { ArrowIcon, BaseMark, TokenIcon } from "./icons";
+import { ArrowIcon, TokenIcon } from "./icons";
 
 export function ProductCard({ product }: { product: Product }) {
   return (
@@ -14,19 +15,14 @@ export function ProductCard({ product }: { product: Product }) {
 
       <h2 className="product-name">{product.name}</h2>
 
-      <span className="network-chip">
-        <BaseMark size={16} />
-        <span className="network-chip-name">{product.network}</span>
-      </span>
-
-      <button
-        type="button"
+      <Link
+        href={`/product/${product.id}`}
         className="cta-primary earn-cta"
         aria-label={`Earn now with ${product.name}`}
       >
         Earn now
         <ArrowIcon size={16} />
-      </button>
+      </Link>
     </article>
   );
 }

@@ -1,8 +1,7 @@
-import type { AssetSymbol } from "../data/products";
+import type { TokenSymbol } from "../data/products";
 
 // Base network mark. `tone="white"` renders it for the blue season tile.
-// This is the official Base symbol geometry; swap for a supplied asset
-// any time by replacing the path.
+// Official Base symbol geometry; swap for a supplied asset by replacing the path.
 export function BaseMark({ size = 18, tone = "blue" }: { size?: number; tone?: "blue" | "white" }) {
   const fill = tone === "white" ? "#ffffff" : "#0052ff";
   return (
@@ -16,18 +15,18 @@ export function BaseMark({ size = 18, tone = "blue" }: { size?: number; tone?: "
 }
 
 // Round token marks, drawn inline so the bundle stays asset-free.
-export function TokenIcon({ asset, size = 40 }: { asset: AssetSymbol; size?: number }) {
-  if (asset === "WETH") {
+export function TokenIcon({ asset, size = 40 }: { asset: TokenSymbol; size?: number }) {
+  if (asset === "WETH" || asset === "ETH") {
     return (
       <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
         <circle cx="16" cy="16" r="16" fill="#627eea" />
         <g fill="#fff" fillRule="nonzero">
-          <path fillOpacity="0.602" d="M16.5 4v8.87l7.5 3.35z" />
-          <path d="M16.5 4 9 16.22l7.5-3.35z" />
-          <path fillOpacity="0.602" d="M16.5 21.97v6.03L24 17.62z" />
-          <path d="M16.5 28v-6.03L9 17.62z" />
-          <path fillOpacity="0.2" d="M16.5 20.57l7.5-4.35-7.5-3.35z" />
-          <path fillOpacity="0.602" d="M9 16.22l7.5 4.35v-7.7z" />
+          <path fillOpacity="0.602" d="M16.498 4v8.87l7.497 3.35z" />
+          <path d="M16.498 4 9 16.22l7.498-3.35z" />
+          <path fillOpacity="0.602" d="M16.498 21.968v6.027L24 17.616z" />
+          <path d="M16.498 27.995v-6.028L9 17.616z" />
+          <path fillOpacity="0.2" d="M16.498 20.573l7.497-4.353-7.497-3.348z" />
+          <path fillOpacity="0.602" d="M9 16.22l7.498 4.353v-7.701z" />
         </g>
       </svg>
     );
@@ -36,17 +35,7 @@ export function TokenIcon({ asset, size = 40 }: { asset: AssetSymbol; size?: num
     return (
       <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
         <circle cx="16" cy="16" r="16" fill="#2775ca" />
-        <text
-          x="16"
-          y="22.4"
-          textAnchor="middle"
-          fontFamily="var(--sans), system-ui, sans-serif"
-          fontWeight="700"
-          fontSize="18"
-          fill="#fff"
-        >
-          $
-        </text>
+        <text x="16" y="22.4" textAnchor="middle" fontFamily="var(--sans), system-ui, sans-serif" fontWeight="700" fontSize="18" fill="#fff">$</text>
       </svg>
     );
   }
@@ -54,17 +43,7 @@ export function TokenIcon({ asset, size = 40 }: { asset: AssetSymbol; size?: num
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
       <circle cx="16" cy="16" r="16" fill="#f7931a" />
-      <text
-        x="16"
-        y="22.8"
-        textAnchor="middle"
-        fontFamily="var(--sans), system-ui, sans-serif"
-        fontWeight="700"
-        fontSize="18"
-        fill="#fff"
-      >
-        &#8383;
-      </text>
+      <text x="16" y="22.8" textAnchor="middle" fontFamily="var(--sans), system-ui, sans-serif" fontWeight="700" fontSize="18" fill="#fff">&#8383;</text>
     </svg>
   );
 }
@@ -72,13 +51,23 @@ export function TokenIcon({ asset, size = 40 }: { asset: AssetSymbol; size?: num
 export function ArrowIcon({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path
-        d="M3.5 8h9M9 4.5 12.5 8 9 11.5"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M3.5 8h9M9 4.5 12.5 8 9 11.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function ArrowLeftIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M12.5 8h-9M7 4.5 3.5 8 7 11.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function ChevronDownIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
