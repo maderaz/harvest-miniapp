@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="116" fill="#ffb936"/>
+  <g fill="#191717">
+    <text x="50%" y="56%" text-anchor="middle" font-family="'Inter Tight', system-ui, sans-serif" font-weight="700" font-size="120" letter-spacing="-5">Harvest</text>
+    <rect x="392" y="300" width="22" height="22" rx="4"/>
+  </g>
+</svg>

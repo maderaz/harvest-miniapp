@@ -1,0 +1,6 @@
+/* Harvest Mini App - global stylesheet.
+   Import order matters: tokens (variables) first, then the shared
+   design-system components, then the mobile Mini App layer. */
+@import "./styles/tokens.css";
+@import "./styles/components.css";
+@import "./styles/miniapp.css";
