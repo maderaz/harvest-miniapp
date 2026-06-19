@@ -22,13 +22,13 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-const appUrl = process.env.NEXT_PUBLIC_URL ?? "https://harvest-miniapp.example";
+const appUrl = process.env.NEXT_PUBLIC_URL ?? "https://harvest-miniapp.vercel.app";
 
 // Mini App embed (shown when the app URL is shared in a feed). The image and
 // splash art are placeholders for this first iteration.
 const miniappEmbed = {
   version: "1",
-  imageUrl: `${appUrl}/hero.png`,
+  imageUrl: `${appUrl}/opengraph-image`,
   button: {
     title: "Open Harvest",
     action: {
@@ -42,8 +42,21 @@ const miniappEmbed = {
 };
 
 export const metadata: Metadata = {
-  title: "Harvest - Base season",
-  description: "Put your assets on autopilot. WETH, USDC and cbBTC autopilots on Base.",
+  metadataBase: new URL(appUrl),
+  title: "Harvest - Earn on Autopilot",
+  description: "Explore USDC, WETH and cbBTC Strategies",
+  openGraph: {
+    title: "Harvest - Earn on Autopilot",
+    description: "Explore USDC, WETH and cbBTC Strategies",
+    url: appUrl,
+    siteName: "Harvest",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Harvest - Earn on Autopilot",
+    description: "Explore USDC, WETH and cbBTC Strategies",
+  },
   other: {
     "fc:miniapp": JSON.stringify(miniappEmbed),
     // Back-compat with the older frame embed key.

@@ -390,6 +390,93 @@ body { background: var(--gold); }
 }
 @keyframes cta-spin { to { transform: rotate(360deg); } }
 
+/* ── Source of Yield (below the performance chart) ─────────── */
+.block-title {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.yield-source {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-2);
+}
+.block-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+.vault-address-btn {
+  align-self: flex-start;
+  padding: 9px 14px;
+  font-size: 13px;
+}
+.vault-address-btn svg { display: block; }
+
+/* ── Allocation box (bottom of the product page) ───────────── */
+.allocation {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--card-2);
+  border: 1px solid rgba(25, 23, 23, 0.05);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: 0 10px 26px -16px rgba(25, 23, 23, 0.45);
+}
+.alloc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.alloc-row { display: flex; flex-direction: column; gap: 6px; }
+.alloc-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.alloc-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-3);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.alloc-pct {
+  flex-shrink: 0;
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-3);
+  font-feature-settings: "tnum";
+}
+.alloc-row.is-active .alloc-name { color: var(--ink); font-weight: 600; }
+.alloc-row.is-active .alloc-pct { color: var(--ink); }
+.alloc-bar {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: rgba(25, 23, 23, 0.08);
+  overflow: hidden;
+}
+.alloc-bar span {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--gold);
+}
+
 /* ── My Positions ──────────────────────────────────────────── */
 /* Two calm 50/50 tiles: My Balance + Total earned. */
 .position-grid {

@@ -59,7 +59,9 @@ export function ProductTabs({
       {active === "enter" && <DepositPanel product={product} mode="enter" apy={apy} />}
       {active === "exit" && <DepositPanel product={product} mode="exit" />}
       {active === "positions" && <MyPositionsPanel product={product} />}
-      {active === "performance" && <PerformancePanel stats={stats} series={series} live={live} />}
+      {active === "performance" && (
+        <PerformancePanel stats={stats} series={series} live={live} product={product} />
+      )}
     </div>
   );
 }

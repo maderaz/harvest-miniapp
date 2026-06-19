@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AllocationBox } from "../../components/AllocationBox";
 import { HarvestLogo } from "../../components/HarvestLogo";
 import { ProductTabs } from "../../components/ProductTabs";
 import { WalletBadge } from "../../components/WalletBadge";
@@ -59,6 +60,8 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         </section>
 
         <ProductTabs product={product} stats={stats} series={series} live={!!live} apy={recapApy} />
+
+        <AllocationBox />
       </div>
     </main>
   );
