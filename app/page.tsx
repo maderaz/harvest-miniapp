@@ -1,6 +1,7 @@
 import { HarvestLogo } from "./components/HarvestLogo";
 import { LegalFooter } from "./components/LegalFooter";
 import { ProductCard } from "./components/ProductCard";
+import { SocialLinks } from "./components/SocialLinks";
 import { WalletBadge } from "./components/WalletBadge";
 import { PRODUCTS } from "./data/products";
 import { formatApy, getSnapshots } from "./lib/api";
@@ -27,6 +28,8 @@ export default async function Home() {
             <ProductCard key={product.id} product={product} />
           ))}
         </section>
+
+        <SocialLinks />
 
         <LegalFooter />
       </div>

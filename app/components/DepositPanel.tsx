@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { AssetSymbol, Product, TokenSymbol } from "../data/products";
 import { TokenSelect } from "./TokenSelect";
+import { useWallet } from "./WalletProvider";
 
 type Mode = "enter" | "exit";
 type Status = "idle" | "approving" | "depositing" | "success";
@@ -38,6 +39,7 @@ function apyFraction(apy: string): number {
 }
 
 export function DepositPanel({ product, mode = "enter", apy }: { product: Product; mode?: Mode; apy?: string }) {
+  const { connected, connect } = useWallet();
   const isEnter = mode === "enter";
   // Exit always settles in the vault asset; Enter lets the user pick.
   const [token, setToken] = useState<TokenSymbol>(isEnter ? product.depositTokens[0] : product.asset);
@@ -74,6 +76,10 @@ export function DepositPanel({ product, mode = "enter", apy }: { product: Produc
   // Simulate wallet txs: each step is pending for ~2s. ERC-20 entries run an
   // approve step before the deposit; the deposit step clears the input.
   const onCta = () => {
+    if (!connected) {
+      connect();
+      return;
+    }
     if (!canSubmit || busy) return;
     if (needsApproval) {
       setStatus("approving");
@@ -92,6 +98,7 @@ export function DepositPanel({ product, mode = "enter", apy }: { product: Produc
   };
 
   const ctaContent = () => {
+    if (!connected) return "Connect Wallet";
     if (status === "approving")
       return (
         <>
@@ -177,19 +184,22 @@ export function DepositPanel({ product, mode = "enter", apy }: { product: Produc
         </>
       )}
 
-      <button type="button" className="cta-primary earn-cta" disabled={!canSubmit || busy} onClick={onCta}>
+      <button
+        type="button"
+        className="cta-primary earn-cta"
+        disabled={connected && (!canSubmit || busy)}
+        onClick={onCta}
+      >
         {ctaContent()}
       </button>
 
-      <p className={`panel-note${status === "success" ? " is-success" : ""}`}>
-        {status === "success"
-          ? isEnter
-            ? "Deposit confirmed. Preview your earnings in the My Positions tab."
-            : "Exit confirmed. Preview the change in the My Positions tab."
-          : isEnter
-            ? "Connect a wallet to deposit. Wallet support lands next."
-            : "Connect a wallet to withdraw. Wallet support lands next."}
-      </p>
+      {status === "success" && (
+        <p className="panel-note is-success">
+          {isEnter
+            ? "Deposit confirmed. Preview your earnings in the My Position tab."
+            : "Exit successful. Assets are now in your wallet."}
+        </p>
+      )}
     </div>
   );
 }

@@ -105,7 +105,7 @@ export function buildBalanceSeries(id: string, points = 32): { dates: number[]; 
   for (let i = 0; i < points; i++) {
     dates.push(now - (points - 1 - i) * DAY_MS);
     b += 0.008 + rng() * 0.03; // strictly positive step -> monotonic growth
-    balance.push(Number(b.toFixed(4)));
+    balance.push(Number(b.toFixed(6)));
   }
   return { dates, balance };
 }

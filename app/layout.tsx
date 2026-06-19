@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Inter_Tight, JetBrains_Mono } from "next/font/google";
 import { MiniAppReady } from "./ready";
+import { WalletProvider } from "./components/WalletProvider";
 import "./globals.css";
 
 const inter = Inter({
@@ -89,7 +90,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body>
         <MiniAppReady />
-        {children}
+        <WalletProvider>{children}</WalletProvider>
       </body>
     </html>
   );

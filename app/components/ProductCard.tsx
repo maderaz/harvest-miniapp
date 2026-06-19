@@ -4,7 +4,7 @@ import { ArrowIcon, TokenIcon } from "./icons";
 
 export function ProductCard({ product }: { product: Product }) {
   return (
-    <article className="product-card">
+    <Link href={`/product/${product.id}`} className="product-card" aria-label={`Open ${product.name}`}>
       <div className="product-top">
         <div className="apy">
           <span className="apy-value">{product.apy}</span>
@@ -15,14 +15,10 @@ export function ProductCard({ product }: { product: Product }) {
 
       <h2 className="product-name">{product.name}</h2>
 
-      <Link
-        href={`/product/${product.id}`}
-        className="cta-primary earn-cta"
-        aria-label={`Earn now with ${product.name}`}
-      >
+      <span className="cta-primary earn-cta">
         Earn now
         <ArrowIcon size={16} />
-      </Link>
-    </article>
+      </span>
+    </Link>
   );
 }
