@@ -2,17 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ChevronDownIcon } from "./icons";
-
-// Simulated wallet connection. Default view is disconnected; connecting drops
-// in a mock address, and the connected pill opens a copy/disconnect menu.
-const MOCK_ADDRESS = "0x1F98a4C2b7Df6e21cE5b3aD9842112aa97c0b5E4";
+import { MOCK_ADDRESS, useWallet } from "./WalletProvider";
 
 function short(addr: string): string {
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
 }
 
 export function WalletBadge() {
-  const [connected, setConnected] = useState(false);
+  const { connected, connect, disconnect } = useWallet();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -28,7 +25,7 @@ export function WalletBadge() {
 
   if (!connected) {
     return (
-      <button type="button" className="wallet-badge" onClick={() => setConnected(true)}>
+      <button type="button" className="wallet-badge" onClick={connect}>
         <span className="wallet-dot is-off" aria-hidden="true" />
         <span className="wallet-text">Connect Wallet</span>
       </button>
@@ -69,7 +66,7 @@ export function WalletBadge() {
             className="wallet-menu-item"
             role="menuitem"
             onClick={() => {
-              setConnected(false);
+              disconnect();
               setOpen(false);
             }}
           >
