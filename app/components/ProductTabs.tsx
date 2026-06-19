@@ -4,12 +4,14 @@ import { useState } from "react";
 import type { Product } from "../data/products";
 import type { ChartSeries } from "../lib/chart-data";
 import { DepositPanel } from "./DepositPanel";
+import { MyPositionsPanel } from "./MyPositionsPanel";
 import { PerformancePanel } from "./PerformancePanel";
 
 const TABS = [
   { id: "enter", label: "Enter" },
   { id: "exit", label: "Exit" },
   { id: "performance", label: "Performance" },
+  { id: "positions", label: "Positions" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -50,6 +52,7 @@ export function ProductTabs({
       {active === "enter" && <DepositPanel product={product} mode="enter" apy={apy} />}
       {active === "exit" && <DepositPanel product={product} mode="exit" />}
       {active === "performance" && <PerformancePanel stats={stats} series={series} live={live} />}
+      {active === "positions" && <MyPositionsPanel product={product} />}
     </div>
   );
 }

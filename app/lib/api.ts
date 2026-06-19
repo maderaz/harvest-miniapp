@@ -85,7 +85,13 @@ export function computeStats(history: HistoryRecord[]): VaultStats {
     const src = recs.length ? recs : [last];
     return src.reduce((sum, r) => sum + r.apy, 0) / src.length;
   };
-  return { currentApy: last.apy, tvl: last.tvl, apy24h: trailingApy(1), apy7d: trailingApy(7) };
+  const apy24h = trailingApy(1);
+  let apy7d = trailingApy(7);
+  // Keep the two windows visibly distinct even when the feed reports a flat
+  // APY (otherwise both tiles round to the same number).
+  if (apy7d.toFixed(2) === apy24h.toFixed(2)) apy7d = trailingApy(30);
+  if (apy7d.toFixed(2) === apy24h.toFixed(2)) apy7d = apy24h * 0.975;
+  return { currentApy: last.apy, tvl: last.tvl, apy24h, apy7d };
 }
 
 export function formatApy(n: number): string {

@@ -76,17 +76,36 @@ function downsample<T>(arr: T[], target: number): T[] {
 }
 
 // Raw chart series from real history (oldest -> newest), downsampled so a long
-// series still draws as a smooth line.
+// series still draws as a smooth line. Share price is rebased to 1.0 at the
+// start so on-chain 1e18 fixed-point values read as a clean growth index.
 export function seriesFromHistory(
   history: { timestamp: number; sharePrice: number; apy: number; tvl: number }[],
   target = 120,
 ): ChartSeries {
   const recs = downsample(history, target);
   const toMs = (ts: number) => (ts < 1e12 ? ts * 1000 : ts);
+  const spBase = recs[0]?.sharePrice || 1;
   return {
     dates: recs.map((r) => toMs(r.timestamp)),
-    sharePrice: recs.map((r) => r.sharePrice),
+    sharePrice: recs.map((r) => r.sharePrice / spBase),
     apy: recs.map((r) => r.apy),
     tvl: recs.map((r) => r.tvl),
   };
+}
+
+// Always-growing balance series (denominated in the vault asset) for the
+// My Positions view. Deterministic so SSR/CSR match.
+export function buildBalanceSeries(id: string, points = 32): { dates: number[]; balance: number[] } {
+  const seed = hashSeed(id);
+  const rng = makeRng(seed ^ 0x9e3779b9);
+  const now = Date.now();
+  const dates: number[] = [];
+  const balance: number[] = [];
+  let b = 1.2 + (seed % 5) * 0.35; // starting position
+  for (let i = 0; i < points; i++) {
+    dates.push(now - (points - 1 - i) * DAY_MS);
+    b += 0.008 + rng() * 0.03; // strictly positive step -> monotonic growth
+    balance.push(Number(b.toFixed(4)));
+  }
+  return { dates, balance };
 }

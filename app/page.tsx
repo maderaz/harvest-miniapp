@@ -1,7 +1,7 @@
 import { HarvestLogo } from "./components/HarvestLogo";
 import { LegalFooter } from "./components/LegalFooter";
 import { ProductCard } from "./components/ProductCard";
-import { SeasonTag } from "./components/SeasonTag";
+import { WalletBadge } from "./components/WalletBadge";
 import { PRODUCTS } from "./data/products";
 import { formatApy, getSnapshots } from "./lib/api";
 
@@ -19,7 +19,7 @@ export default async function Home() {
       <div className="app-frame">
         <header className="app-top">
           <HarvestLogo />
-          <SeasonTag />
+          <WalletBadge />
         </header>
 
         <section className="product-list" aria-label="DeFi products">

@@ -42,6 +42,7 @@ export function DepositPanel({ product, mode = "enter", apy }: { product: Produc
   const [token, setToken] = useState<TokenSymbol>(isEnter ? product.depositTokens[0] : product.asset);
   const [amount, setAmount] = useState("");
   const [helpOpen, setHelpOpen] = useState(false);
+  const [status, setStatus] = useState<"idle" | "pending" | "success">("idle");
 
   const balance = isEnter ? WALLET_BALANCE[token] : VAULT_POSITION[product.asset];
   const balanceToken: TokenSymbol = isEnter ? token : product.asset;
@@ -54,7 +55,20 @@ export function DepositPanel({ product, mode = "enter", apy }: { product: Produc
     yearly !== null ? `≈ ${fmtAmount(yearly, token)} ${token} / yr` : "—";
 
   // Leave ~1% for gas on Enter; a full position can be withdrawn on Exit.
-  const setMax = () => setAmount(trimmed(balance * (isEnter ? 0.99 : 1), balanceToken));
+  const setMax = () => {
+    setAmount(trimmed(balance * (isEnter ? 0.99 : 1), balanceToken));
+    if (status === "success") setStatus("idle");
+  };
+
+  // Simulate a wallet tx: pending for ~2s, then confirmed (clears the input).
+  const submit = () => {
+    if (!canSubmit || status === "pending") return;
+    setStatus("pending");
+    setTimeout(() => {
+      setStatus("success");
+      setAmount("");
+    }, 2000);
+  };
 
   const amountField = (
     <div className="form-field">
@@ -70,7 +84,10 @@ export function DepositPanel({ product, mode = "enter", apy }: { product: Produc
           inputMode="decimal"
           placeholder="0.0"
           value={amount}
-          onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
+          onChange={(e) => {
+            setAmount(e.target.value.replace(/[^0-9.]/g, ""));
+            if (status === "success") setStatus("idle");
+          }}
         />
         <button type="button" className="max-btn" onClick={setMax}>MAX</button>
         <span className="amount-token">{balanceToken}</span>
@@ -119,18 +136,32 @@ export function DepositPanel({ product, mode = "enter", apy }: { product: Produc
         </>
       )}
 
-      <button type="button" className="cta-primary earn-cta" disabled={!canSubmit}>
-        {canSubmit
-          ? isEnter
-            ? `Deposit ${amount} ${token}`
-            : `Exit ${amount} ${balanceToken}`
-          : "Enter an amount"}
+      <button
+        type="button"
+        className="cta-primary earn-cta"
+        disabled={!canSubmit || status === "pending"}
+        onClick={submit}
+      >
+        {status === "pending" ? (
+          <>
+            <span className="cta-spinner" aria-hidden="true" />
+            Confirming…
+          </>
+        ) : canSubmit ? (
+          isEnter ? `Deposit ${amount} ${token}` : `Exit ${amount} ${balanceToken}`
+        ) : (
+          "Enter an amount"
+        )}
       </button>
 
-      <p className="panel-note">
-        {isEnter
-          ? "Connect a wallet to deposit. Wallet support lands next."
-          : "Connect a wallet to withdraw. Wallet support lands next."}
+      <p className={`panel-note${status === "success" ? " is-success" : ""}`}>
+        {status === "success"
+          ? isEnter
+            ? "Deposit confirmed — preview your earnings in the Positions tab."
+            : "Exit confirmed — preview the change in the Positions tab."
+          : isEnter
+            ? "Connect a wallet to deposit. Wallet support lands next."
+            : "Connect a wallet to withdraw. Wallet support lands next."}
       </p>
     </div>
   );
