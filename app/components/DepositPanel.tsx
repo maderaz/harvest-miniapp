@@ -5,6 +5,7 @@ import type { AssetSymbol, Product, TokenSymbol } from "../data/products";
 import { TokenSelect } from "./TokenSelect";
 
 type Mode = "enter" | "exit";
+type Status = "idle" | "approving" | "depositing" | "success";
 
 // Mock balances (deterministic so SSR/CSR match). Wallet balances back the
 // Enter flow; the vault position (denominated in the asset) backs Exit.
@@ -42,17 +43,21 @@ export function DepositPanel({ product, mode = "enter", apy }: { product: Produc
   const [token, setToken] = useState<TokenSymbol>(isEnter ? product.depositTokens[0] : product.asset);
   const [amount, setAmount] = useState("");
   const [helpOpen, setHelpOpen] = useState(false);
-  const [status, setStatus] = useState<"idle" | "pending" | "success">("idle");
+  const [status, setStatus] = useState<Status>("idle");
+  const [approved, setApproved] = useState(false);
 
   const balance = isEnter ? WALLET_BALANCE[token] : VAULT_POSITION[product.asset];
   const balanceToken: TokenSymbol = isEnter ? token : product.asset;
 
   const amountNum = Number.parseFloat(amount);
   const canSubmit = !Number.isNaN(amountNum) && amountNum > 0;
+  const busy = status === "approving" || status === "depositing";
+
+  // ERC-20 entries need an approval first; native ETH does not.
+  const needsApproval = isEnter && token !== "ETH" && !approved;
 
   const yearly = canSubmit && apy ? amountNum * apyFraction(apy) : null;
-  const yearlyText =
-    yearly !== null ? `≈ ${fmtAmount(yearly, token)} ${token} / yr` : "—";
+  const yearlyText = yearly !== null ? `≈ ${fmtAmount(yearly, token)} ${token} / yr` : "-";
 
   // Leave ~1% for gas on Enter; a full position can be withdrawn on Exit.
   const setMax = () => {
@@ -60,23 +65,59 @@ export function DepositPanel({ product, mode = "enter", apy }: { product: Produc
     if (status === "success") setStatus("idle");
   };
 
-  // Simulate a wallet tx: pending for ~2s, then confirmed (clears the input).
-  const submit = () => {
-    if (!canSubmit || status === "pending") return;
-    setStatus("pending");
+  const onTokenChange = (t: TokenSymbol) => {
+    setToken(t);
+    setApproved(false);
+    setStatus("idle");
+  };
+
+  // Simulate wallet txs: each step is pending for ~2s. ERC-20 entries run an
+  // approve step before the deposit; the deposit step clears the input.
+  const onCta = () => {
+    if (!canSubmit || busy) return;
+    if (needsApproval) {
+      setStatus("approving");
+      setTimeout(() => {
+        setApproved(true);
+        setStatus("idle");
+      }, 2000);
+      return;
+    }
+    setStatus("depositing");
     setTimeout(() => {
       setStatus("success");
       setAmount("");
+      setApproved(false);
     }, 2000);
+  };
+
+  const ctaContent = () => {
+    if (status === "approving")
+      return (
+        <>
+          <span className="cta-spinner" aria-hidden="true" />
+          Approving…
+        </>
+      );
+    if (status === "depositing")
+      return (
+        <>
+          <span className="cta-spinner" aria-hidden="true" />
+          Confirming…
+        </>
+      );
+    if (!canSubmit) return "Enter an amount";
+    if (needsApproval) return "Approve token";
+    return isEnter ? `Deposit ${amount} ${token}` : `Exit ${amount} ${balanceToken}`;
   };
 
   const amountField = (
     <div className="form-field">
       <div className="field-row">
         <label className="field-label" htmlFor="deposit-amount">Enter amount</label>
-        <span className="field-balance">
-          My Balance: {fmtAmount(balance, balanceToken)} {balanceToken}
-        </span>
+        <button type="button" className="field-balance" onClick={setMax}>
+          My Balance: <span className="field-balance-value">{fmtAmount(balance, balanceToken)} {balanceToken}</span>
+        </button>
       </div>
       <div className="amount-input">
         <input
@@ -101,7 +142,7 @@ export function DepositPanel({ product, mode = "enter", apy }: { product: Produc
         <>
           <div className="form-field">
             <span className="field-label">Select token</span>
-            <TokenSelect value={token} options={product.depositTokens} onChange={setToken} />
+            <TokenSelect value={token} options={product.depositTokens} onChange={onTokenChange} />
           </div>
           {amountField}
           <div className="yield-row">
@@ -121,7 +162,7 @@ export function DepositPanel({ product, mode = "enter", apy }: { product: Produc
             {helpOpen && (
               <p className="yield-help">
                 This is an estimate based on the vault&apos;s recent historical APY. It is not a promise or
-                guarantee of future returns &mdash; yields vary and can go down. Treat it as rough guidance only.
+                guarantee of future returns. Yields vary and can go down, so treat it as rough guidance only.
               </p>
             )}
           </div>
@@ -136,29 +177,15 @@ export function DepositPanel({ product, mode = "enter", apy }: { product: Produc
         </>
       )}
 
-      <button
-        type="button"
-        className="cta-primary earn-cta"
-        disabled={!canSubmit || status === "pending"}
-        onClick={submit}
-      >
-        {status === "pending" ? (
-          <>
-            <span className="cta-spinner" aria-hidden="true" />
-            Confirming…
-          </>
-        ) : canSubmit ? (
-          isEnter ? `Deposit ${amount} ${token}` : `Exit ${amount} ${balanceToken}`
-        ) : (
-          "Enter an amount"
-        )}
+      <button type="button" className="cta-primary earn-cta" disabled={!canSubmit || busy} onClick={onCta}>
+        {ctaContent()}
       </button>
 
       <p className={`panel-note${status === "success" ? " is-success" : ""}`}>
         {status === "success"
           ? isEnter
-            ? "Deposit confirmed — preview your earnings in the Positions tab."
-            : "Exit confirmed — preview the change in the Positions tab."
+            ? "Deposit confirmed. Preview your earnings in the My Positions tab."
+            : "Exit confirmed. Preview the change in the My Positions tab."
           : isEnter
             ? "Connect a wallet to deposit. Wallet support lands next."
             : "Connect a wallet to withdraw. Wallet support lands next."}

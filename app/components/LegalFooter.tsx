@@ -19,7 +19,7 @@ export function LegalFooter() {
         <a href="https://www.harvest.finance/security" target="_blank" rel="noopener noreferrer">
           audited
         </a>
-        , but audits don&apos;t remove risk &mdash; only deposit what you can afford to lose.
+        , but audits don&apos;t remove risk. Only deposit what you can afford to lose.
       </p>
     </footer>
   );
