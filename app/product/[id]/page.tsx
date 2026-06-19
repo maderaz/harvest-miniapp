@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { HarvestLogo } from "../../components/HarvestLogo";
 import { ProductTabs } from "../../components/ProductTabs";
 import { SeasonTag } from "../../components/SeasonTag";
-import { ArrowLeftIcon, TokenIcon } from "../../components/icons";
+import { ArrowLeftIcon, BaseMark, TokenIcon } from "../../components/icons";
 import { PRODUCTS, getProduct } from "../../data/products";
 import { buildSeries, seriesFromHistory } from "../../lib/chart-data";
 import { computeStats, formatApy, formatTvl, getHistory } from "../../lib/api";
@@ -45,7 +45,12 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           <TokenIcon asset={product.asset} size={46} />
           <div className="recap-text">
             <h1 className="recap-name">{product.name}</h1>
-            <p className="recap-tagline">{product.tagline}</p>
+            <p className="recap-tagline">
+              <span className="base-chip" aria-hidden="true">
+                <BaseMark size={11} tone="white" />
+              </span>
+              {product.tagline}
+            </p>
           </div>
           <div className="recap-apy">
             <span className="recap-apy-value">{recapApy}</span>

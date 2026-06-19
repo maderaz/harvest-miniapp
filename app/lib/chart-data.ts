@@ -1,7 +1,16 @@
 // Deterministic placeholder series so server and client render identically
-// (no Math.random -> no hydration mismatch). Replace with live data later.
+// (no Math.random -> no hydration mismatch). Live data replaces it when the
+// Harvest feed is reachable. Values are kept RAW (real units) so the chart can
+// show actual rates in the crosshair; the chart normalises for plotting.
 
-export type ChartSeries = { sharePrice: number[]; apy: number[]; tvl: number[] };
+export type ChartSeries = {
+  dates: number[]; // unix ms, oldest -> newest
+  sharePrice: number[]; // share price (e.g. 1.0423)
+  apy: number[]; // percent (e.g. 5.42)
+  tvl: number[]; // USD
+};
+
+const DAY_MS = 86_400_000;
 
 function hashSeed(input: string): number {
   let h = 2166136261;
@@ -20,43 +29,41 @@ function makeRng(seed: number): () => number {
   };
 }
 
-// Map values into 0.08..0.92 so lines keep padding from the plot edges.
-function normalize(values: number[]): number[] {
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const span = max - min || 1;
-  return values.map((v) => 0.08 + ((v - min) / span) * 0.84);
-}
-
 export function buildSeries(id: string, points = 32): ChartSeries {
-  const rng = makeRng(hashSeed(id));
+  const seed = hashSeed(id);
+  const rng = makeRng(seed);
+  const now = Date.now();
 
-  // Share price: upward trajectory with zig-zag noise.
-  const rawSharePrice: number[] = [];
-  let v = 0;
+  const dates: number[] = [];
+  for (let i = 0; i < points; i++) dates.push(now - (points - 1 - i) * DAY_MS);
+
+  // Share price: small positive daily returns (auto-compounding).
+  const sharePrice: number[] = [];
+  let sp = 1;
   for (let i = 0; i < points; i++) {
-    v += 0.6 + (rng() - 0.35) * 1.4; // net upward drift, jittery
-    rawSharePrice.push(v);
+    sp += sp * (0.0002 + rng() * 0.0011);
+    sharePrice.push(Number(sp.toFixed(6)));
   }
 
-  // APY: fluctuates around a mid level, mean-reverting (no strong trend).
-  const rawApy: number[] = [];
-  let a = 0.5;
+  // APY: mean-reverting around a per-vault base (~4-8%).
+  const base = 4 + (seed % 5);
+  const apy: number[] = [];
+  let a = base;
   for (let i = 0; i < points; i++) {
-    a += (rng() - 0.5) * 0.32;
-    a += (0.5 - a) * 0.18;
-    rawApy.push(a);
+    a += (rng() - 0.5) * 0.9;
+    a += (base - a) * 0.2;
+    apy.push(Number(Math.max(0.1, a).toFixed(2)));
   }
 
-  // TVL (mock): gentle upward growth with the odd dip, like deposits trickling in.
-  const rawTvl: number[] = [];
-  let t = 1;
+  // TVL: gentle upward drift with the odd pullback.
+  const tvl: number[] = [];
+  let t = 1_500_000 + (seed % 8) * 600_000;
   for (let i = 0; i < points; i++) {
-    t += 0.4 + (rng() - 0.4) * 1.1; // mostly up, occasional pullback
-    rawTvl.push(t);
+    t += t * (rng() - 0.42) * 0.03;
+    tvl.push(Math.round(Math.max(50_000, t)));
   }
 
-  return { sharePrice: normalize(rawSharePrice), apy: normalize(rawApy), tvl: normalize(rawTvl) };
+  return { dates, sharePrice, apy, tvl };
 }
 
 function downsample<T>(arr: T[], target: number): T[] {
@@ -68,13 +75,18 @@ function downsample<T>(arr: T[], target: number): T[] {
   return out;
 }
 
-// Normalised chart series from real history (oldest -> newest), downsampled
-// so a long series still draws as a smooth line.
-export function seriesFromHistory(history: { sharePrice: number; apy: number; tvl: number }[], target = 120): ChartSeries {
+// Raw chart series from real history (oldest -> newest), downsampled so a long
+// series still draws as a smooth line.
+export function seriesFromHistory(
+  history: { timestamp: number; sharePrice: number; apy: number; tvl: number }[],
+  target = 120,
+): ChartSeries {
   const recs = downsample(history, target);
+  const toMs = (ts: number) => (ts < 1e12 ? ts * 1000 : ts);
   return {
-    sharePrice: normalize(recs.map((r) => r.sharePrice)),
-    apy: normalize(recs.map((r) => r.apy)),
-    tvl: normalize(recs.map((r) => r.tvl)),
+    dates: recs.map((r) => toMs(r.timestamp)),
+    sharePrice: recs.map((r) => r.sharePrice),
+    apy: recs.map((r) => r.apy),
+    tvl: recs.map((r) => r.tvl),
   };
 }
