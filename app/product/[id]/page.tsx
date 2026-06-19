@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { HarvestLogo } from "../../components/HarvestLogo";
 import { ProductTabs } from "../../components/ProductTabs";
-import { SeasonTag } from "../../components/SeasonTag";
+import { WalletBadge } from "../../components/WalletBadge";
 import { ArrowLeftIcon, BaseMark, TokenIcon } from "../../components/icons";
 import { PRODUCTS, getProduct } from "../../data/products";
 import { buildSeries, seriesFromHistory } from "../../lib/chart-data";
@@ -33,7 +33,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       <div className="app-frame">
         <header className="app-top">
           <HarvestLogo />
-          <SeasonTag />
+          <WalletBadge />
         </header>
 
         <Link href="/" className="back-link">
