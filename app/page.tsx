@@ -1,10 +1,11 @@
 import { HarvestLogo } from "./components/HarvestLogo";
+import { LegalFooter } from "./components/LegalFooter";
 import { ProductCard } from "./components/ProductCard";
 import { SeasonTag } from "./components/SeasonTag";
 import { PRODUCTS } from "./data/products";
 import { formatApy, getSnapshots } from "./lib/api";
 
-export const revalidate = 300;
+export const revalidate = 3600;
 
 export default async function Home() {
   const snapshots = await getSnapshots(PRODUCTS.map((p) => p.address));
@@ -26,6 +27,8 @@ export default async function Home() {
             <ProductCard key={product.id} product={product} />
           ))}
         </section>
+
+        <LegalFooter />
       </div>
     </main>
   );

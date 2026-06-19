@@ -1,7 +1,7 @@
 // Deterministic placeholder series so server and client render identically
 // (no Math.random -> no hydration mismatch). Replace with live data later.
 
-export type ChartSeries = { sharePrice: number[]; apy: number[] };
+export type ChartSeries = { sharePrice: number[]; apy: number[]; tvl: number[] };
 
 function hashSeed(input: string): number {
   let h = 2166136261;
@@ -48,7 +48,15 @@ export function buildSeries(id: string, points = 32): ChartSeries {
     rawApy.push(a);
   }
 
-  return { sharePrice: normalize(rawSharePrice), apy: normalize(rawApy) };
+  // TVL (mock): gentle upward growth with the odd dip, like deposits trickling in.
+  const rawTvl: number[] = [];
+  let t = 1;
+  for (let i = 0; i < points; i++) {
+    t += 0.4 + (rng() - 0.4) * 1.1; // mostly up, occasional pullback
+    rawTvl.push(t);
+  }
+
+  return { sharePrice: normalize(rawSharePrice), apy: normalize(rawApy), tvl: normalize(rawTvl) };
 }
 
 function downsample<T>(arr: T[], target: number): T[] {
@@ -62,10 +70,11 @@ function downsample<T>(arr: T[], target: number): T[] {
 
 // Normalised chart series from real history (oldest -> newest), downsampled
 // so a long series still draws as a smooth line.
-export function seriesFromHistory(history: { sharePrice: number; apy: number }[], target = 120): ChartSeries {
+export function seriesFromHistory(history: { sharePrice: number; apy: number; tvl: number }[], target = 120): ChartSeries {
   const recs = downsample(history, target);
   return {
     sharePrice: normalize(recs.map((r) => r.sharePrice)),
     apy: normalize(recs.map((r) => r.apy)),
+    tvl: normalize(recs.map((r) => r.tvl)),
   };
 }

@@ -11,7 +11,7 @@
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID ?? "8453"; // Base
 const ENDPOINT = `https://clownfish-app-2dsdk.ondigitalocean.app/${CHAIN_ID}`;
-const REVALIDATE = 300; // seconds
+const REVALIDATE = 3600; // seconds (hourly)
 
 export type HistoryRecord = { timestamp: number; tvl: number; sharePrice: number; apy: number };
 export type VaultStats = { currentApy: number; tvl: number; apy24h: number; apy7d: number };

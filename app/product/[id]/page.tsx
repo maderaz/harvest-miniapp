@@ -8,7 +8,7 @@ import { PRODUCTS, getProduct } from "../../data/products";
 import { buildSeries, seriesFromHistory } from "../../lib/chart-data";
 import { computeStats, formatApy, formatTvl, getHistory } from "../../lib/api";
 
-export const revalidate = 300;
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return PRODUCTS.map((product) => ({ id: product.id }));
@@ -53,7 +53,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           </div>
         </section>
 
-        <ProductTabs product={product} stats={stats} series={series} live={!!live} />
+        <ProductTabs product={product} stats={stats} series={series} live={!!live} apy={recapApy} />
       </div>
     </main>
   );
