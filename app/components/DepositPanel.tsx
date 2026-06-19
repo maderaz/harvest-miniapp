@@ -1,26 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import type { AssetSymbol, Product, TokenSymbol } from "../data/products";
+import type { Product, TokenSymbol } from "../data/products";
+import { VAULT_POSITION, WALLET_BALANCE } from "../data/balances";
 import { TokenSelect } from "./TokenSelect";
 import { useWallet } from "./WalletProvider";
 
 type Mode = "enter" | "exit";
 type Status = "idle" | "approving" | "depositing" | "success";
-
-// Mock balances (deterministic so SSR/CSR match). Wallet balances back the
-// Enter flow; the vault position (denominated in the asset) backs Exit.
-const WALLET_BALANCE: Record<TokenSymbol, number> = {
-  ETH: 8.2431,
-  WETH: 12.4823,
-  USDC: 5240.18,
-  cbBTC: 0.3472,
-};
-const VAULT_POSITION: Record<AssetSymbol, number> = {
-  WETH: 6.5129,
-  USDC: 3180.44,
-  cbBTC: 0.1208,
-};
 
 function fmtAmount(n: number, token: TokenSymbol): string {
   const d = token === "USDC" ? 2 : 4;

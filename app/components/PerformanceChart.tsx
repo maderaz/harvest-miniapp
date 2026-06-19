@@ -22,7 +22,7 @@ function fmtUsd(n: number): string {
 }
 
 const METRICS: { id: MetricId; label: string; format: (v: number) => string }[] = [
-  { id: "sharePrice", label: "Share price", format: (v) => v.toFixed(4) },
+  { id: "sharePrice", label: "Share price", format: (v) => v.toFixed(6) },
   { id: "apy", label: "APY", format: (v) => `${v.toFixed(2)}%` },
   { id: "tvl", label: "TVL", format: fmtUsd },
 ];

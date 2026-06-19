@@ -1,4 +1,5 @@
 import type { AssetSymbol, Product } from "../data/products";
+import { VAULT_POSITION } from "../data/balances";
 import { buildBalanceSeries } from "../lib/chart-data";
 import { BalanceChart } from "./BalanceChart";
 import { TokenIcon } from "./icons";
@@ -11,7 +12,8 @@ function usd(n: number): string {
 }
 
 export function MyPositionsPanel({ product }: { product: Product }) {
-  const { dates, balance } = buildBalanceSeries(product.id);
+  const position = VAULT_POSITION[product.asset];
+  const { dates, balance } = buildBalanceSeries(product.id, position);
   const current = balance[balance.length - 1];
   const earned = current - balance[0];
   const price = PRICE[product.asset];
@@ -24,9 +26,7 @@ export function MyPositionsPanel({ product }: { product: Product }) {
             <TokenIcon asset={product.asset} size={20} />
           </span>
           <span className="position-label">My Balance</span>
-          <span className="position-value">
-            {current.toFixed(6)} {product.asset}
-          </span>
+          <span className="position-value">{current.toFixed(6)}</span>
           <span className="position-usd">{usd(current * price)}</span>
         </div>
 
@@ -35,9 +35,7 @@ export function MyPositionsPanel({ product }: { product: Product }) {
             <TokenIcon asset={product.asset} size={20} />
           </span>
           <span className="position-label">Total earned</span>
-          <span className="position-value is-earn">
-            +{earned.toFixed(6)} {product.asset}
-          </span>
+          <span className="position-value is-earn">+{earned.toFixed(6)}</span>
           <span className="position-usd">{usd(earned * price)}</span>
         </div>
       </div>

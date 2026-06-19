@@ -56,7 +56,7 @@ export function BalanceChart({ dates, values, asset }: { dates: number[]; values
       </div>
 
       <div
-        className="chart-plot"
+        className="chart-plot is-compact"
         onPointerDown={pick}
         onPointerMove={(e) => {
           if (e.buttons === 1) pick(e);
