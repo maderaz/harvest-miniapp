@@ -7,7 +7,8 @@ import { DepositPanel } from "./DepositPanel";
 import { PerformancePanel } from "./PerformancePanel";
 
 const TABS = [
-  { id: "holdings", label: "Holdings" },
+  { id: "enter", label: "Enter" },
+  { id: "exit", label: "Exit" },
   { id: "performance", label: "Performance" },
 ] as const;
 
@@ -19,13 +20,15 @@ export function ProductTabs({
   stats,
   series,
   live,
+  apy,
 }: {
   product: Product;
   stats: Stats;
   series: ChartSeries;
   live: boolean;
+  apy: string;
 }) {
-  const [active, setActive] = useState<TabId>("holdings");
+  const [active, setActive] = useState<TabId>("enter");
 
   return (
     <div className="tabs">
@@ -44,11 +47,9 @@ export function ProductTabs({
         ))}
       </div>
 
-      {active === "holdings" ? (
-        <DepositPanel product={product} />
-      ) : (
-        <PerformancePanel stats={stats} series={series} live={live} />
-      )}
+      {active === "enter" && <DepositPanel product={product} mode="enter" apy={apy} />}
+      {active === "exit" && <DepositPanel product={product} mode="exit" />}
+      {active === "performance" && <PerformancePanel stats={stats} series={series} live={live} />}
     </div>
   );
 }

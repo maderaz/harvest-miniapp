@@ -25,7 +25,7 @@ export function PerformancePanel({ stats, series, live }: { stats: Stats; series
 
       <p className="panel-note">
         {live
-          ? "Live from the Harvest API, refreshed every few minutes."
+          ? "Live from the Harvest API, refreshed hourly."
           : "Sample data shown - live feed is temporarily unavailable."}
       </p>
     </div>

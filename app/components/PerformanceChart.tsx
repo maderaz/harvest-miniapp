@@ -31,10 +31,11 @@ export function PerformanceChart({ series }: { series: ChartSeries }) {
   return (
     <div className="perf-chart">
       <div className="chart-head">
-        <span className="chart-title">Share price &amp; APY</span>
+        <span className="chart-title">Share price, APY &amp; TVL</span>
         <span className="chart-legend">
           <span className="legend-item"><span className="legend-dot is-share" />Share price</span>
           <span className="legend-item"><span className="legend-dot is-apy" />APY</span>
+          <span className="legend-item"><span className="legend-dot is-tvl" />TVL</span>
         </span>
       </div>
 
@@ -44,7 +45,7 @@ export function PerformanceChart({ series }: { series: ChartSeries }) {
           preserveAspectRatio="none"
           className="chart-svg"
           role="img"
-          aria-label="Share price and APY over the trailing 30 days"
+          aria-label="Share price, APY and TVL over the trailing 30 days"
         >
           <defs>
             <linearGradient id="share-fill" x1="0" y1="0" x2="0" y2="1">
@@ -53,6 +54,16 @@ export function PerformanceChart({ series }: { series: ChartSeries }) {
             </linearGradient>
           </defs>
           <path d={areaPath(series.sharePrice)} fill="url(#share-fill)" />
+          <path
+            d={linePath(series.tvl)}
+            fill="none"
+            stroke="#0052ff"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray="5 5"
+            vectorEffect="non-scaling-stroke"
+          />
           <path
             d={linePath(series.apy)}
             fill="none"

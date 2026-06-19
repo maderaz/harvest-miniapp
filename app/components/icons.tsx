@@ -14,37 +14,27 @@ export function BaseMark({ size = 18, tone = "blue" }: { size?: number; tone?: "
   );
 }
 
-// Round token marks, drawn inline so the bundle stays asset-free.
+// Round token marks. Served from /public so every view shares the same
+// official artwork (ETH reuses the WETH mark).
+const TOKEN_ART: Record<TokenSymbol, string> = {
+  ETH: "/weth.png",
+  WETH: "/weth.png",
+  USDC: "/usdc.svg",
+  cbBTC: "/cbbtc.png",
+};
+
 export function TokenIcon({ asset, size = 40 }: { asset: TokenSymbol; size?: number }) {
-  if (asset === "WETH" || asset === "ETH") {
-    return (
-      <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
-        <circle cx="16" cy="16" r="16" fill="#627eea" />
-        <g fill="#fff" fillRule="nonzero">
-          <path fillOpacity="0.602" d="M16.498 4v8.87l7.497 3.35z" />
-          <path d="M16.498 4 9 16.22l7.498-3.35z" />
-          <path fillOpacity="0.602" d="M16.498 21.968v6.027L24 17.616z" />
-          <path d="M16.498 27.995v-6.028L9 17.616z" />
-          <path fillOpacity="0.2" d="M16.498 20.573l7.497-4.353-7.497-3.348z" />
-          <path fillOpacity="0.602" d="M9 16.22l7.498 4.353v-7.701z" />
-        </g>
-      </svg>
-    );
-  }
-  if (asset === "USDC") {
-    return (
-      <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
-        <circle cx="16" cy="16" r="16" fill="#2775ca" />
-        <text x="16" y="22.4" textAnchor="middle" fontFamily="var(--sans), system-ui, sans-serif" fontWeight="700" fontSize="18" fill="#fff">$</text>
-      </svg>
-    );
-  }
-  // cbBTC
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
-      <circle cx="16" cy="16" r="16" fill="#f7931a" />
-      <text x="16" y="22.8" textAnchor="middle" fontFamily="var(--sans), system-ui, sans-serif" fontWeight="700" fontSize="18" fill="#fff">&#8383;</text>
-    </svg>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={TOKEN_ART[asset]}
+      width={size}
+      height={size}
+      alt=""
+      aria-hidden="true"
+      className="token-art"
+      style={{ width: size, height: size }}
+    />
   );
 }
 
