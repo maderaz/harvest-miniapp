@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { TokenSymbol } from "../data/products";
 
 // Base network mark. `tone="white"` renders it for the blue season tile.
@@ -59,5 +60,61 @@ export function ChevronDownIcon({ size = 18 }: { size?: number }) {
     <svg width={size} height={size} viewBox="0 0 18 18" fill="none" aria-hidden="true">
       <path d="M4.5 7 9 11.5 13.5 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
+  );
+}
+
+// ── Tab icons (stroked, 16px grid) ──────────────────────────
+function tabSvg(size: number, children: ReactNode) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      {children}
+    </svg>
+  );
+}
+
+// Enter / deposit: arrow down into a tray.
+export function EnterIcon({ size = 16 }: { size?: number }) {
+  return tabSvg(
+    size,
+    <g stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 2.5v6.5" />
+      <path d="M5.2 6.3 8 9l2.8-2.7" />
+      <path d="M3 12.5h10" />
+    </g>,
+  );
+}
+
+// Exit / withdraw: arrow up from a tray.
+export function ExitIcon({ size = 16 }: { size?: number }) {
+  return tabSvg(
+    size,
+    <g stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 9.5V3" />
+      <path d="M5.2 5.7 8 3l2.8 2.7" />
+      <path d="M3 12.5h10" />
+    </g>,
+  );
+}
+
+// My Positions: stacked layers (holdings).
+export function PositionsIcon({ size = 16 }: { size?: number }) {
+  return tabSvg(
+    size,
+    <g stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 2.2 14 5 8 7.8 2 5 8 2.2Z" />
+      <path d="M2.4 8.4 8 11l5.6-2.6" />
+      <path d="M2.4 11.2 8 13.8l5.6-2.6" />
+    </g>,
+  );
+}
+
+// Performance: trending-up line.
+export function PerformanceIcon({ size = 16 }: { size?: number }) {
+  return tabSvg(
+    size,
+    <g stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2.5 10.5 6 7l2.4 2.4L13.5 4.5" />
+      <path d="M10.4 4.5h3.1v3.1" />
+    </g>,
   );
 }
