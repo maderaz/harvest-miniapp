@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AllocationBox } from "../../components/AllocationBox";
 import { HarvestLogo } from "../../components/HarvestLogo";
 import { ProductTabs } from "../../components/ProductTabs";
 import { WalletBadge } from "../../components/WalletBadge";
@@ -55,13 +54,11 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           </div>
           <div className="recap-apy">
             <span className="recap-apy-value">{recapApy}</span>
-            <span className="recap-apy-label">APY</span>
+            <span className="recap-apy-label">Live APY</span>
           </div>
         </section>
 
         <ProductTabs product={product} stats={stats} series={series} live={!!live} apy={recapApy} />
-
-        <AllocationBox />
       </div>
     </main>
   );

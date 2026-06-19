@@ -1,5 +1,6 @@
 import type { Product } from "../data/products";
 import type { ChartSeries } from "../lib/chart-data";
+import { AllocationBox } from "./AllocationBox";
 import { PerformanceChart } from "./PerformanceChart";
 import { ExternalLinkIcon } from "./icons";
 
@@ -17,6 +18,7 @@ export function PerformancePanel({
   product: Product;
 }) {
   return (
+    <>
     <div className="panel">
       <div className="stat-row">
         <div className="stat-tile">
@@ -60,5 +62,8 @@ export function PerformancePanel({
         </a>
       </div>
     </div>
+
+    <AllocationBox />
+    </>
   );
 }

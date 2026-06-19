@@ -8,7 +8,7 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="product-top">
         <div className="apy">
           <span className="apy-value">{product.apy}</span>
-          <span className="apy-label">APY</span>
+          <span className="apy-label">Live APY</span>
         </div>
         <TokenIcon asset={product.asset} size={40} />
       </div>

@@ -94,18 +94,29 @@ export function seriesFromHistory(
 }
 
 // Always-growing balance series (denominated in the vault asset) for the
-// My Positions view. Deterministic so SSR/CSR match.
-export function buildBalanceSeries(id: string, points = 32): { dates: number[]; balance: number[] } {
-  const seed = hashSeed(id);
-  const rng = makeRng(seed ^ 0x9e3779b9);
+// My Position view. Ends exactly at `end` (the current vault position) so the
+// chart, the balance tile and the Exit tab all agree. Deterministic.
+export function buildBalanceSeries(id: string, end: number, points = 32): { dates: number[]; balance: number[] } {
+  const rng = makeRng(hashSeed(id) ^ 0x9e3779b9);
   const now = Date.now();
+
+  // Monotonic cumulative shape, then scale into [start, end] with start < end.
+  const shape: number[] = [];
+  let acc = 0;
+  for (let i = 0; i < points; i++) {
+    acc += 0.5 + rng();
+    shape.push(acc);
+  }
+  const lo = shape[0];
+  const hi = shape[points - 1] || 1;
+  const start = end * 0.6; // ~40% of the position was earned over the window
+
   const dates: number[] = [];
   const balance: number[] = [];
-  let b = 1.2 + (seed % 5) * 0.35; // starting position
   for (let i = 0; i < points; i++) {
     dates.push(now - (points - 1 - i) * DAY_MS);
-    b += 0.008 + rng() * 0.03; // strictly positive step -> monotonic growth
-    balance.push(Number(b.toFixed(6)));
+    const t = (shape[i] - lo) / (hi - lo); // 0 -> 1
+    balance.push(Number((start + (end - start) * t).toFixed(6)));
   }
   return { dates, balance };
 }
