@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, type PointerEvent as ReactPointerEvent } from "react";
 import type { ChartSeries } from "../lib/chart-data";
 
 const W = 1000;
@@ -6,11 +9,41 @@ const PAD_X = 14;
 const PAD_TOP = 16;
 const PAD_BOTTOM = 16;
 
-function linePath(values: number[]): string {
-  const n = values.length;
+// CSS padding on .chart-plot (keep in sync with miniapp.css).
+const PLOT_PAD_X = 10;
+
+type MetricId = "sharePrice" | "apy" | "tvl";
+
+function fmtUsd(n: number): string {
+  if (n >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
+  if (n >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
+  if (n >= 1e3) return `$${(n / 1e3).toFixed(1)}K`;
+  return `$${n.toFixed(0)}`;
+}
+
+const METRICS: { id: MetricId; label: string; format: (v: number) => string }[] = [
+  { id: "sharePrice", label: "Share price", format: (v) => v.toFixed(4) },
+  { id: "apy", label: "APY", format: (v) => `${v.toFixed(2)}%` },
+  { id: "tvl", label: "TVL", format: fmtUsd },
+];
+
+function fmtDate(ms: number): string {
+  return new Date(ms).toLocaleDateString("en-US", { day: "numeric", month: "short" });
+}
+
+// Map raw values into 0.08..0.92 so the line keeps padding from the plot edges.
+function normalize(values: number[]): number[] {
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const span = max - min || 1;
+  return values.map((v) => 0.08 + ((v - min) / span) * 0.84);
+}
+
+function linePath(norm: number[]): string {
+  const n = norm.length;
   const innerW = W - PAD_X * 2;
   const innerH = H - PAD_TOP - PAD_BOTTOM;
-  return values
+  return norm
     .map((val, i) => {
       const x = PAD_X + (innerW * i) / (n - 1);
       const y = PAD_TOP + innerH * (1 - val);
@@ -19,75 +52,102 @@ function linePath(values: number[]): string {
     .join(" ");
 }
 
-function areaPath(values: number[]): string {
-  const innerW = W - PAD_X * 2;
-  const baseY = H - PAD_BOTTOM;
-  return `${linePath(values)} L${(PAD_X + innerW).toFixed(1)} ${baseY} L${PAD_X.toFixed(1)} ${baseY} Z`;
-}
-
-// Share price = green line (positive trajectory), APY = gold line (brand accent),
-// on the dotted plot from charts.md.
+// All three metrics share the APY look: one solid Sunflower Gold line. Metric
+// tabs replace the legend; tap/drag the plot for a crosshair readout.
 export function PerformanceChart({ series }: { series: ChartSeries }) {
+  const [metric, setMetric] = useState<MetricId>("apy");
+  const [active, setActive] = useState<number | null>(null);
+
+  const values = series[metric];
+  const n = values.length;
+  const norm = normalize(values);
+  const current = METRICS.find((m) => m.id === metric)!;
+
+  const innerW = W - PAD_X * 2;
+  const innerH = H - PAD_TOP - PAD_BOTTOM;
+  const xAt = (i: number) => PAD_X + (innerW * i) / (n - 1);
+  const yAt = (i: number) => PAD_TOP + innerH * (1 - norm[i]);
+
+  const readoutIndex = active ?? n - 1;
+  const readoutLabel = active === null ? "Today" : fmtDate(series.dates[readoutIndex]);
+
+  function pick(e: ReactPointerEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const innerLeft = rect.left + PLOT_PAD_X;
+    const usable = rect.width - PLOT_PAD_X * 2;
+    const frac = Math.min(1, Math.max(0, (e.clientX - innerLeft) / usable));
+    setActive(Math.round(frac * (n - 1)));
+  }
+
   return (
     <div className="perf-chart">
-      <div className="chart-head">
-        <span className="chart-title">Share price, APY &amp; TVL</span>
-        <span className="chart-legend">
-          <span className="legend-item"><span className="legend-dot is-share" />Share price</span>
-          <span className="legend-item"><span className="legend-dot is-apy" />APY</span>
-          <span className="legend-item"><span className="legend-dot is-tvl" />TVL</span>
-        </span>
+      <div className="chart-tabs" role="tablist" aria-label="Chart metric">
+        {METRICS.map((m) => (
+          <button
+            key={m.id}
+            type="button"
+            role="tab"
+            aria-selected={metric === m.id}
+            className={`chart-tab${metric === m.id ? " is-active" : ""}`}
+            onClick={() => {
+              setMetric(m.id);
+              setActive(null);
+            }}
+          >
+            {m.label}
+          </button>
+        ))}
       </div>
 
-      <div className="chart-plot">
+      <div className="chart-readout">
+        <span className="chart-readout-date">{readoutLabel}</span>
+        <span className="chart-readout-value">{current.format(values[readoutIndex])}</span>
+      </div>
+
+      <div
+        className="chart-plot"
+        onPointerDown={pick}
+        onPointerMove={(e) => {
+          if (e.buttons === 1) pick(e);
+        }}
+      >
         <svg
           viewBox={`0 0 ${W} ${H}`}
           preserveAspectRatio="none"
           className="chart-svg"
           role="img"
-          aria-label="Share price, APY and TVL over the trailing 30 days"
+          aria-label={`${current.label} over the trailing ${n} days`}
         >
-          <defs>
-            <linearGradient id="share-fill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#1f7c4d" stopOpacity="0.22" />
-              <stop offset="100%" stopColor="#1f7c4d" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          <path d={areaPath(series.sharePrice)} fill="url(#share-fill)" />
+          {active !== null && (
+            <line
+              x1={xAt(active)}
+              x2={xAt(active)}
+              y1={PAD_TOP}
+              y2={H - PAD_BOTTOM}
+              stroke="rgba(25,23,23,0.35)"
+              strokeWidth="1.5"
+              strokeDasharray="4 4"
+              vectorEffect="non-scaling-stroke"
+            />
+          )}
           <path
-            d={linePath(series.tvl)}
-            fill="none"
-            stroke="#0052ff"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeDasharray="5 5"
-            vectorEffect="non-scaling-stroke"
-          />
-          <path
-            d={linePath(series.apy)}
+            d={linePath(norm)}
             fill="none"
             stroke="#ffb936"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-          />
-          <path
-            d={linePath(series.sharePrice)}
-            fill="none"
-            stroke="#1f7c4d"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
             vectorEffect="non-scaling-stroke"
           />
+          {active !== null && (
+            <circle cx={xAt(active)} cy={yAt(active)} r="7" fill="#ffb936" stroke="#fff" strokeWidth="2" />
+          )}
         </svg>
       </div>
 
       <div className="chart-axis">
-        <span>30d ago</span>
-        <span>15d ago</span>
+        <span>{fmtDate(series.dates[0])}</span>
+        <span>{fmtDate(series.dates[Math.floor((n - 1) / 2)])}</span>
         <span>today</span>
       </div>
     </div>
